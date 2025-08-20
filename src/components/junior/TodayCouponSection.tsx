@@ -12,6 +12,8 @@ type Coupon = {
   isSoldOut: boolean;
 };
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const TodayCouponSection: React.FC = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [downloadingCoupons, setDownloadingCoupons] = useState<Set<number>>(new Set());
@@ -40,12 +42,9 @@ const TodayCouponSection: React.FC = () => {
         return;
       }
 
-      const response = await fetch(
-        `https://dev.unear.site/api/app/coupons/${couponTemplateId}/status`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/app/coupons/${couponTemplateId}/status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       const result = await response.json();
 
@@ -113,7 +112,7 @@ const TodayCouponSection: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`https://dev.unear.site/api/app/coupons/${couponId}/fcfs`, {
+      const response = await fetch(`${API_BASE_URL}/api/app/coupons/${couponId}/fcfs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

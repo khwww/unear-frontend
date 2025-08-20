@@ -3,6 +3,7 @@
 // [신규] 룰렛 결과를 서버에 전송하는 함수
 // ProbabilityRoulette 컴포넌트에 있던 fetch 로직을 가져와 재사용 가능한 함수로 만듭니다.
 export const sendRouletteResult = async (eventId: number, prizeName: string) => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const token = sessionStorage.getItem('temp_access_token');
   if (!token) {
     // 실제 프로덕션에서는 로그인 페이지로 리디렉션하거나
@@ -17,7 +18,7 @@ export const sendRouletteResult = async (eventId: number, prizeName: string) => 
     participated: 1, // 필요 시 이 값도 파라미터로 받을 수 있습니다.
   };
 
-  const response = await fetch(`https://dev.unear.site/api/app/roulette/spin/${eventId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/app/roulette/spin/${eventId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -75,13 +76,14 @@ export const sendRouletteResult = async (eventId: number, prizeName: string) => 
  */
 export const checkRouletteParticipation = async (eventId: number): Promise<boolean> => {
   try {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
     const token = sessionStorage.getItem('temp_access_token');
     if (!token) {
       throw new Error('로그인이 필요합니다.');
     }
 
     // 룰렛 참여 확인을 위한 API - 보통 GET 요청으로 현재 상태를 확인
-    const response = await fetch(`https://dev.unear.site/api/app/roulette/spin/${eventId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/app/roulette/spin/${eventId}`, {
       method: 'GET', // 상태 확인용 GET 요청
       headers: {
         Authorization: `Bearer ${token}`,

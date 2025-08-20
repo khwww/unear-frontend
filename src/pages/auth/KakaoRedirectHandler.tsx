@@ -5,7 +5,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import axiosInstance from '@/apis/axiosInstance';
 
 // 환경변수에서 API 도메인 가져오기
-const API_DOMAIN = import.meta.env.VITE_API_BASE_URL || 'https://dev.unear.site';
+const API_DOMAIN = import.meta.env.VITE_API_BASE_URL;
 
 // API 응답 타입 정의
 interface KakaoLoginResponse {
