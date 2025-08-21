@@ -553,18 +553,6 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
     // 필터링 상태가 변경될 때마다 마커를 다시 렌더링
     useEffect(() => {
       if (mapInstanceRef.current) {
-        const storedIsBookmarkOnly = localStorage.getItem('isBookmarkOnly');
-        const storedCategoryCodes = localStorage.getItem('categoryCodes');
-        const storedBenefitCategories = localStorage.getItem('benefitCategories');
-
-        const _currentIsBookmarkOnly = storedIsBookmarkOnly
-          ? JSON.parse(storedIsBookmarkOnly)
-          : false;
-        const _currentCategoryCodes = storedCategoryCodes ? JSON.parse(storedCategoryCodes) : [];
-        const _currentBenefitCategories = storedBenefitCategories
-          ? JSON.parse(storedBenefitCategories)
-          : [];
-
         renderMarkers();
       }
     }, [isBookmarkOnly, categoryCodes, benefitCategories, renderMarkers]);

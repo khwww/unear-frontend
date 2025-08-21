@@ -267,16 +267,20 @@ const SignUpPage = () => {
       const result = await authApi.signup(signupData);
 
       if (result.resultCode === 200) {
-        showSuccessToast(`회원가입이 완료되었습니다! 환영합니다, ${result.data.username}님!`);
+        const username = typeof result.data === 'object' && result.data?.username ? result.data.username : '사용자';
+        showSuccessToast(`회원가입이 완료되었습니다! 환영합니다, ${username}님!`);
         navigate('/login');
       } else {
-        showErrorToast(result.message || '회원가입에 실패했습니다.');
+        const message = typeof result === 'object' && result.message ? result.message : '회원가입에 실패했습니다.';
+        showErrorToast(message);
       }
     } catch (error: unknown) {
       const apiError = error as ApiErrorResponse;
 
       if (
+        typeof apiError.response?.data === 'object' &&
         apiError.response?.data?.codeName === 'INVALID_INPUT_VALUE' &&
+        typeof apiError.response.data === 'object' &&
         apiError.response.data?.data?.fieldErrors
       ) {
         const fieldErrors = apiError.response.data.data.fieldErrors;
@@ -285,11 +289,17 @@ const SignUpPage = () => {
           errorMessage += `- ${message}\n`;
         });
         showErrorToast(errorMessage);
-      } else if (apiError.response?.data?.codeName === 'DUPLICATED_EMAIL') {
+      } else if (
+        typeof apiError.response?.data === 'object' &&
+        apiError.response?.data?.codeName === 'DUPLICATED_EMAIL'
+      ) {
         setEmailExistsError(true);
         showErrorToast('이미 가입된 이메일입니다.');
       } else {
-        showErrorToast(apiError.response?.data?.message || '회원가입에 실패했습니다.');
+        const message = typeof apiError.response?.data === 'object' && apiError.response?.data?.message 
+          ? apiError.response.data.message 
+          : '회원가입에 실패했습니다.';
+        showErrorToast(message);
       }
     } finally {
       setIsLoading(false);

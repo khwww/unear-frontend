@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { CategoryData, ApiMonthlyData } from './types';
+import type { ApiMonthlyData } from './types';
 
 export const useStatisticsData = () => {
   const [currentMonth, setCurrentMonth] = useState(7);

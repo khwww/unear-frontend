@@ -37,6 +37,7 @@ type Story = StoryObj<typeof StorePhoneModal>;
 
 const sampleStore: BookmarkStore = {
   id: 'store1',
+  placeId: 1,
   name: '스타벅스 강남점',
   address: '서울 강남구 테헤란로 152',
   distance: '0.2km',

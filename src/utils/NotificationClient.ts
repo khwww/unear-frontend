@@ -140,7 +140,6 @@ export class NotificationClient {
     };
 
     this.eventSource.onerror = (_event) => {
-      const _readyState = this.eventSource?.readyState;
       this.updateConnectionStatus('disconnected');
       this.handleReconnect();
     };

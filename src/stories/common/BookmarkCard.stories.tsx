@@ -20,6 +20,7 @@ type Story = StoryObj<typeof BookmarkCard>;
 
 const sampleStore: BookmarkStore = {
   id: 'store1',
+  placeId: 1,
   name: '스타벅스 강남점',
   address: '서울 강남구 테헤란로 152',
   distance: '0.2km',
@@ -35,8 +36,8 @@ export const 기본: Story = {
   args: {
     store: sampleStore,
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 즐겨찾기 토글됨 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 즐겨찾기 토글됨 - ${storeId}`),
   },
 };
 
@@ -44,8 +45,8 @@ export const 다크모드: Story = {
   args: {
     store: sampleStore,
     isDarkMode: true,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 다크모드 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 다크모드 - ${storeId}`),
   },
 };
 
@@ -56,8 +57,8 @@ export const 즐겨찾기됨: Story = {
       isBookmarked: true,
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 즐겨찾기 토글됨 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 즐겨찾기 토글됨 - ${storeId}`),
   },
 };
 
@@ -69,8 +70,8 @@ export const 소상공인매장: Story = {
       storeClass: 'LOCAL',
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 소상공인 매장 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 소상공인 매장 - ${storeId}`),
   },
 };
 
@@ -81,8 +82,8 @@ export const 이벤트매장_일반: Story = {
       event: 'GENERAL',
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 일반 이벤트 매장 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 일반 이벤트 매장 - ${storeId}`),
   },
 };
 
@@ -93,8 +94,8 @@ export const 이벤트매장_필수: Story = {
       event: 'REQUIRE',
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 필수 이벤트 매장 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 필수 이벤트 매장 - ${storeId}`),
   },
 };
 
@@ -106,8 +107,8 @@ export const 다크모드_이벤트매장: Story = {
       isBookmarked: true,
     },
     isDarkMode: true,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 다크모드 이벤트 매장 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 다크모드 이벤트 매장 - ${storeId}`),
   },
 };
 
@@ -120,8 +121,8 @@ export const 전화번호없음: Story = {
       phoneNumber: undefined, // 전화번호 없음
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 전화번호 없는 매장 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 전화번호 없는 매장 - ${storeId}`),
   },
 };
 
@@ -135,8 +136,8 @@ export const 이십사시간매장: Story = {
       category: 'LIFE',
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 24시간 매장 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 24시간 매장 - ${storeId}`),
   },
 };
 
@@ -149,8 +150,8 @@ export const 심야매장: Story = {
       category: 'FOOD',
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 심야 매장 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 심야 매장 - ${storeId}`),
   },
 };
 
@@ -162,8 +163,8 @@ export const 현재시간테스트: Story = {
       hours: '08:00 - 20:00',
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 현재시간 테스트 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 현재시간 테스트 - ${storeId}`),
   },
 };
 
@@ -177,8 +178,8 @@ export const 뷰티매장: Story = {
       hours: '10:00 - 22:00',
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 뷰티 매장 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 뷰티 매장 - ${storeId}`),
   },
 };
 
@@ -192,7 +193,7 @@ export const 문화매장: Story = {
       event: 'REQUIRE',
     },
     isDarkMode: false,
-    onBookmarkToggle: (storeId, isBookmarked) =>
-      console.log(`[storybook] 문화 매장 - ${storeId}: ${isBookmarked}`),
+    onBookmarkToggle: (storeId) =>
+      console.log(`[storybook] 문화 매장 - ${storeId}`),
   },
 };
