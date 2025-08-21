@@ -193,7 +193,10 @@ const SignUpPage = () => {
     } catch (error: unknown) {
       const apiError = error as ApiErrorResponse;
       setVerificationCodeError(true);
-      showErrorToast(apiError.response?.data?.message || '인증번호가 올바르지 않습니다.');
+      const message = typeof apiError.response?.data === 'object' && apiError.response?.data?.message 
+        ? apiError.response.data.message 
+        : '인증번호가 올바르지 않습니다.';
+      showErrorToast(message);
     } finally {
       setIsLoading(false);
     }
