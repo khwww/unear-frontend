@@ -86,7 +86,7 @@ unear-frontend/
 │   │   └── 📁 story/                # 스토리 컴포넌트
 │   ├── 📁 hooks/                      # 커스텀 훅
 │   │   ├── 📁 my/                    # 마이페이지 관련 훅
-│   │   ├── 🔔 useNotifications.ts    # 알림 관련 훅
+
 │   │   └── ⬆️ useScrollToTop.ts      # 스크롤 제어 훅
 │   ├── 📁 pages/                      # 페이지 컴포넌트
 │   │   ├── 📁 auth/                  # 인증 관련 페이지
