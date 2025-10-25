@@ -39,7 +39,7 @@ const convertToStoreData = (data: PlaceDetailResponse): StoreData => {
     name: data.name,
     address: data.address,
     category: data.categoryCode,
-    distance: data.distanceKm !== null ? `${data.distanceKm.toFixed(1)}km` : '거리 정보 없음',
+    distance: data.distanceKm !== null && data.distanceKm !== undefined && typeof data.distanceKm === 'number' && !isNaN(data.distanceKm) ? `${data.distanceKm.toFixed(1)}km` : '거리 정보 없음',
     latitude: data.latitude,
     longitude: data.longitude,
     hours: `${data.startTime}:00 - ${data.endTime}:00`,

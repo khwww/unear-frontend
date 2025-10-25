@@ -84,9 +84,9 @@ const StoryRecommendPage = () => {
               placeId: item.placeId,
               name: item.name || item.placeName || '',
               address: item.address || '',
-              distance: item.distanceKm
+              distance: item.distanceKm !== null && item.distanceKm !== undefined && typeof item.distanceKm === 'number' && !isNaN(item.distanceKm)
                 ? `${item.distanceKm.toFixed(1)}km`
-                : item.distanceInMeters
+                : item.distanceInMeters !== null && item.distanceInMeters !== undefined && typeof item.distanceInMeters === 'number' && !isNaN(item.distanceInMeters)
                   ? `${(item.distanceInMeters / 1000).toFixed(1)}km`
                   : '',
               hours:
