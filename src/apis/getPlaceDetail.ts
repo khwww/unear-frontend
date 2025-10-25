@@ -51,7 +51,7 @@ const convertToStoreData = (data: PlaceDetailResponse): StoreData => {
         : '영업종료',
     benefitDesc: data.benefitDesc,
     eventTypeCode: data.eventTypeCode,
-    coupons: data.coupons.map((c) => ({
+    coupons: data.coupons && Array.isArray(data.coupons) ? data.coupons.map((c) => ({
       couponTemplateId: c.couponTemplateId,
       couponName: c.couponName,
       discountCode: c.discountCode,
@@ -61,7 +61,7 @@ const convertToStoreData = (data: PlaceDetailResponse): StoreData => {
       couponEnd: c.couponEnd,
       userCouponId: c.userCouponId,
       downloaded: c.downloaded,
-    })),
+    })) : [],
   };
 };
 
