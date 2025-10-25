@@ -318,7 +318,7 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
                             latitude: store.latitude,
                             longitude: store.longitude,
                             tel: store.tel,
-                            coupons: store.coupons.map((coupon: NearbyCoupon) => ({
+                            coupons: (store.coupons || []).map((coupon: NearbyCoupon) => ({
                               id: String(coupon.couponTemplateId),
                               title: coupon.couponName,
                               expiryDate: coupon.couponEnd.split('T')[0].replace(/-/g, '.'),
