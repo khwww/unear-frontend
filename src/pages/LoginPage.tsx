@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ActionButton from '../components/common/ActionButton';
 import { useAuth } from '@/providers/AuthProvider';
-import axiosInstance from '@/apis/axiosInstance';
 
 // 타입 정의
 interface LocationState {
@@ -22,7 +21,10 @@ interface LoginResponse {
   };
 }
 
-// LoginError 타입은 사용하지 않음
+interface LoginError {
+  name?: string;
+  message?: string;
+}
 
 // 소셜로그인 URL들은 제거됨
 
@@ -59,20 +61,27 @@ const LoginPage = () => {
     setErrorMessage(null);
 
     try {
-      // axiosInstance를 사용하여 로그인 API 호출
-      const response = await axiosInstance.post('/auth/login', {
-        email,
-        password,
+      // 환경변수를 사용한 API URL
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/login`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      const data = response.data as LoginResponse;
+      const data = (await response.json()) as LoginResponse;
+
+      if (!response.ok) {
+        handleErrorResponse(data, response.status);
+        return;
+      }
 
       // 성공 응답 처리
       if (data.codeName === 'SUCCESS' || data.resultCode === 200) {
         if (data.data?.accessToken) {
           // AuthProvider의 login 함수 사용 (JWT 토큰 저장)
-          // refreshToken은 HttpOnly 쿠키로 전송되므로 undefined로 전달
-          await login(data.data.accessToken, undefined);
+          await login(data.data.accessToken, data.data.refreshToken);
 
           // 이전 페이지가 있으면 그곳으로, 없으면 메인 페이지로
           const locationState = location.state as LocationState | null;
@@ -91,20 +100,15 @@ const LoginPage = () => {
       } else {
         handleErrorResponse(data, response.status);
       }
-    } catch (error: any) {
-      console.error('로그인 에러:', error);
-      
-      // Axios 에러 처리
-      if (error.response) {
-        // 서버에서 응답을 받았지만 에러 상태
-        const data = error.response.data as LoginResponse;
-        handleErrorResponse(data, error.response.status);
-      } else if (error.request) {
-        // 요청은 보냈지만 응답을 받지 못함
+    } catch (error: unknown) {
+      const loginError = error as LoginError;
+
+      if (loginError.name === 'TypeError' && loginError.message?.includes('fetch')) {
         setErrorMessage('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.');
       } else {
-        // 요청 설정 중 에러
-        setErrorMessage('로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        setErrorMessage(
+          loginError.message || '로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+        );
       }
     } finally {
       setIsLoading(false);
