@@ -72,6 +72,9 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
     const roadviewRef = useRef<KakaoRoadview | null>(null);
     const roadviewClientRef = useRef<KakaoRoadviewClient | null>(null);
     const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+    
+    // 디바운싱을 위한 ref
+    const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // isLoadviewActive 상태가 변경될 때마다 로드뷰 도로 표시 상태 업데이트
     useEffect(() => {
@@ -357,6 +360,19 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
       toggleLoadview,
     }));
 
+    // 디바운싱된 renderMarkers 함수
+    const debouncedRenderMarkers = useCallback(() => {
+      // 기존 타이머가 있다면 취소
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      
+      // 500ms 후에 실행
+      debounceTimeoutRef.current = setTimeout(() => {
+        renderMarkers();
+      }, 500);
+    }, []);
+
     const renderMarkers = useCallback(async () => {
       const map = mapInstanceRef.current;
       const clusterer = clustererRef.current;
@@ -558,8 +574,8 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
     }, [isBookmarkOnly, categoryCodes, benefitCategories, renderMarkers]);
 
     useEffect(() => {
-      fetchPlacesInViewportRef.current = renderMarkers;
-    }, [renderMarkers]);
+      fetchPlacesInViewportRef.current = debouncedRenderMarkers;
+    }, [debouncedRenderMarkers]);
 
     // selectedPlaceId가 변경될 때는 renderMarkers를 호출하지 않음
     // 마커 선택 상태는 renderMarkers 내에서 처리됨
@@ -800,13 +816,13 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
 
             window.kakao.maps.event.addListener(map, 'idle', () => {
               if (!isSettingCenterRef.current) {
-                renderMarkers();
+                debouncedRenderMarkers();
               }
             });
 
             // 지도 레벨 변경 이벤트 리스너 추가
             window.kakao.maps.event.addListener(map, 'zoom_changed', () => {
-              renderMarkers();
+              debouncedRenderMarkers();
             });
 
             // 로드뷰 모드일 때 지도 클릭 이벤트 추가
@@ -873,6 +889,15 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
         window.removeEventListener('storage', handleStorageChange);
       };
     }, [renderMarkers]);
+
+    // 컴포넌트 언마운트 시 타이머 정리
+    useEffect(() => {
+      return () => {
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current);
+        }
+      };
+    }, []);
 
     return (
       <div ref={mapRef} className="w-full h-full absolute top-0 left-0 z-0">

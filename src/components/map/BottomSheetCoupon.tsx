@@ -276,12 +276,12 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
                     </span>
                     <div className="w-[48px] h-[18px] bg-pink-100 rounded-[12px] flex items-center justify-center flex-shrink-0 relative top-[1px]">
                       <span className="text-s font-semibold text-pink-700 mt-[3px]">
-                        {nearbyStores.length}개
+                        {nearbyStores && Array.isArray(nearbyStores) ? nearbyStores.length : 0}개
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-col items-center gap-[23px]">
-                    {nearbyStores.map((store) => {
+                    {nearbyStores && Array.isArray(nearbyStores) ? nearbyStores.map((store) => {
                       const now = new Date();
                       const currentHour = now.getHours();
                       const openHour = Number(store.startTime);
@@ -331,7 +331,11 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
                           onCouponClick={handleCardClick}
                         />
                       );
-                    })}
+                    }) : (
+                      <div className="flex justify-center items-center py-8">
+                        <EmptyState message="주변에 매장이 없어요" />
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
