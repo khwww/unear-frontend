@@ -48,7 +48,7 @@ interface UpdateUserInfoRequest {
  */
 export const getUserInfo = async (): Promise<UserInfoApiResponse['data'] | null> => {
   try {
-    const response = await axiosInstance.get('/users/me', {
+    const response = await axiosInstance.get('/auth/me', {
       timeout: 10000, // 10초 타임아웃
     });
 

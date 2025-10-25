@@ -7,21 +7,15 @@ import MainPage from '@/pages/MainPage';
 import MembershipPage from '@/pages/MembershipPage';
 import MembershipDetailPage from '@/pages/MembershipDetailPage';
 import MapPage from '@/pages/MapPage';
-import StoryPage from '@/pages/StoryPage';
-import StoryDiagnosisPage from '@/pages/StoryDiagnosisPage';
-import StoryDetailPage from '@/pages/StoryDetailPage';
-import StoryEndPage from '@/pages/StoryEndPage';
-import StoryRecommendPage from '@/pages/StoryRecommendPage';
+// 스토리 페이지들은 제거됨
 import JuniorPage from '@/pages/JuniorPage';
 import MyPage from '@/pages/MyPage';
 import LoginPage from '@/pages/LoginPage';
 import SignUpPage from '@/pages/SignUpPage';
 import ChangePasswordPage from '@/pages/ChangePasswordPage';
 
-import KakaoCallback from '@/pages/auth/KakaoCallback';
 import CompleteProfilePage from '@/pages/CompleteProfilePage';
-import GoogleRedirectHandler from '@/pages/auth/GoogleRedirectHandler';
-import NaverAuthHandler from '@/pages/auth/NaverAuthHandler';
+// 소셜로그인 관련 import들은 제거됨
 
 import StatisticsDetailPage from '@/pages/StatisticsDetailPage';
 import UsageHistoryPage from '@/pages/UsageHistoryPage';
@@ -74,46 +68,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: '/story',
-        element: (
-          <ProtectedRoute>
-            <StoryPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/story/diagnosis',
-        element: (
-          <ProtectedRoute>
-            <StoryDiagnosisPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/story/detail',
-        element: (
-          <ProtectedRoute>
-            <StoryDetailPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/story/end',
-        element: (
-          <ProtectedRoute>
-            <StoryEndPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/story/recommend',
-        element: (
-          <ProtectedRoute>
-            <StoryRecommendPage />
-          </ProtectedRoute>
-        ),
-      },
+      // 스토리 관련 라우트들은 제거됨
       {
         path: '/junior',
         element: (
@@ -185,11 +140,7 @@ const router = createBrowserRouter([
 
       { path: '/complete-profile', element: <CompleteProfilePage /> },
 
-      { path: '/login/oauth2/code/google', element: <GoogleRedirectHandler /> },
-
-      { path: '/login/oauth2/code/kakao', element: <KakaoCallback /> },
-
-      { path: '/login/oauth2/code/naver', element: <NaverAuthHandler /> },
+      // 소셜로그인 관련 라우트들은 제거됨
     ],
   },
   {

@@ -26,10 +26,7 @@ interface LoginError {
   message?: string;
 }
 
-// 환경변수를 사용한 URL 설정
-const KAKAO_AUTH_URL = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/kakao`;
-const GOOGLE_AUTH_URL = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google`;
-const NAVER_AUTH_URL = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/naver`;
+// 소셜로그인 URL들은 제거됨
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -316,45 +313,7 @@ const LoginPage = () => {
           </button>
         </motion.div>
 
-        {/* 간편 로그인 텍스트 */}
-        <motion.div
-          className="text-center mb-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 1.2, ease: 'easeOut' }}
-        >
-          <p className="text-sm font-light text-zinc-400">간편 로그인</p>
-        </motion.div>
-
-        {/* 소셜 로그인 버튼들 */}
-        <motion.div
-          className="flex justify-center gap-10"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8, ease: 'easeOut' }}
-        >
-          <a href={NAVER_AUTH_URL} aria-label="네이버 로그인">
-            <img
-              src="https://test.codemshop.com/wp-content/plugins/mshop-mcommerce-premium-s2/lib/mshop-members-s2/assets/images/social/icon_1/Naver.png"
-              className="w-12 h-12 object-cover rounded-full hover:scale-110 transition-transform"
-              alt="네이버 로그인"
-            />
-          </a>
-          <a href={KAKAO_AUTH_URL} aria-label="카카오 로그인">
-            <img
-              src="https://test.codemshop.com/wp-content/plugins/mshop-mcommerce-premium-s2/lib/mshop-members-s2/assets/images/social/icon_1/Kakao.png"
-              className="w-12 h-12 object-cover rounded-full hover:scale-110 transition-transform"
-              alt="카카오 로그인"
-            />
-          </a>
-          <a href={GOOGLE_AUTH_URL} aria-label="구글 로그인">
-            <img
-              src="https://test.codemshop.com/wp-content/plugins/mshop-mcommerce-premium-s2/lib/mshop-members-s2/assets/images/social/icon_1/Google.png"
-              className="w-12 h-12 object-cover rounded-full hover:scale-110 transition-transform"
-              alt="구글 로그인"
-            />
-          </a>
-        </motion.div>
+        {/* 소셜로그인 UI는 제거됨 */}
       </div>
     </div>
   );
