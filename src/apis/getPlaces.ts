@@ -33,11 +33,11 @@ export const getPlaces = async ({
       },
     });
 
-    // 데이터 콘솔 출력
-
     return res.data?.data || [];
   } catch (error) {
-    throw error;
+    console.error('장소 조회 실패:', error);
+    // 서버 에러 시 빈 배열 반환하여 앱이 중단되지 않도록 함
+    return [];
   }
 };
 
@@ -79,6 +79,8 @@ export const getPlacesForSearch = async ({
 
     return res.data?.data || [];
   } catch (error) {
-    throw error;
+    console.error('장소 검색 실패:', error);
+    // 서버 에러 시 빈 배열 반환하여 앱이 중단되지 않도록 함
+    return [];
   }
 };
