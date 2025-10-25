@@ -49,12 +49,17 @@ const BottomSheetSearchList = ({
     const fetchDetails = async () => {
       try {
         setIsLoading(true);
+        console.log('🔍 BottomSheetSearchList Debug:');
+        console.log('  - results:', results, 'isArray:', Array.isArray(results));
+        console.log('  - results.length:', results?.length);
+        
         const promises = results.map((place) =>
           getPlaceDetail(place.placeId, currentLat, currentLng)
         );
         const detailData = await Promise.all(promises);
         setStoreList(detailData);
       } catch (err) {
+        console.error('❌ BottomSheetSearchList fetchDetails error:', err);
       } finally {
         setIsLoading(false);
       }

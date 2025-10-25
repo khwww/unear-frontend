@@ -152,6 +152,13 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
   }, [isOpen, activeTab]);
 
   const expiringSoonCoupons = Array.isArray(coupons) ? coupons.filter(isExpiringSoon) : [];
+  
+  // 디버깅 로그 추가
+  console.log('🔍 BottomSheetCoupon Debug:');
+  console.log('  - activeTab:', activeTab);
+  console.log('  - coupons:', coupons, 'isArray:', Array.isArray(coupons));
+  console.log('  - nearbyStores:', nearbyStores, 'isArray:', Array.isArray(nearbyStores));
+  console.log('  - expiringSoonCoupons:', expiringSoonCoupons);
 
   return (
     <>
