@@ -159,6 +159,12 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
   console.log('  - coupons:', coupons, 'isArray:', Array.isArray(coupons));
   console.log('  - nearbyStores:', nearbyStores, 'isArray:', Array.isArray(nearbyStores));
   console.log('  - expiringSoonCoupons:', expiringSoonCoupons);
+  
+  // nearbyStores 내부 구조 확인
+  if (nearbyStores && nearbyStores.length > 0) {
+    console.log('🔍 nearbyStores 첫 번째 객체:', nearbyStores[0]);
+    console.log('🔍 nearbyStores 첫 번째 객체의 coupons:', nearbyStores[0]?.coupons);
+  }
 
   return (
     <>

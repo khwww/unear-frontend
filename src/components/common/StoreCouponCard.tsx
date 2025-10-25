@@ -76,7 +76,7 @@ const StoreCouponCard: React.FC<StoreCouponCardProps> = ({
 
       // UI 상태 갱신
       setDownloadedCoupons((prev) => new Set(prev).add(couponId));
-      store.coupons = store.coupons.map((coupon) =>
+      store.coupons = (store.coupons || []).map((coupon) =>
         coupon.id === couponId ? { ...coupon, downloaded: true } : coupon
       );
 
@@ -185,7 +185,7 @@ const StoreCouponCard: React.FC<StoreCouponCardProps> = ({
       {/* 쿠폰 목록 */}
       {isExpanded && (
         <div className="mt-[14px] space-y-[10px]">
-          {store.coupons.map((coupon) => (
+          {(store.coupons || []).map((coupon) => (
             <div
               key={coupon.id}
               className={`relative bg-white border border-[#D4D4D8] rounded-[5px] p-3 w-full h-[46px] ${
