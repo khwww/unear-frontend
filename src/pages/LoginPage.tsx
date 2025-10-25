@@ -61,8 +61,11 @@ const LoginPage = () => {
     setErrorMessage(null);
 
     try {
-      // 환경변수를 사용한 API URL
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/login`;
+      // 환경변수를 사용한 API URL (임시로 하드코딩 테스트)
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL || 'https://unear-server-pf-production.up.railway.app'}/auth/login`;
+      
+      console.log('로그인 시도:', { email, apiUrl });
+      console.log('환경변수:', import.meta.env.VITE_API_BASE_URL);
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -70,7 +73,9 @@ const LoginPage = () => {
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('응답 상태:', response.status, response.statusText);
       const data = (await response.json()) as LoginResponse;
+      console.log('응답 데이터:', data);
 
       if (!response.ok) {
         handleErrorResponse(data, response.status);
@@ -101,10 +106,13 @@ const LoginPage = () => {
         handleErrorResponse(data, response.status);
       }
     } catch (error: unknown) {
+      console.error('로그인 에러 상세:', error);
       const loginError = error as LoginError;
 
       if (loginError.name === 'TypeError' && loginError.message?.includes('fetch')) {
         setErrorMessage('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.');
+      } else if (loginError.name === 'TypeError' && loginError.message?.includes('Failed to fetch')) {
+        setErrorMessage('서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.');
       } else {
         setErrorMessage(
           loginError.message || '로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
