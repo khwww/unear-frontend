@@ -5,7 +5,7 @@ import type { StoreData } from '@/types/storeDetail';
 
 export interface PlaceDetailResponse {
   placeId: number;
-  name: string;
+  placeName: string;
   address: string;
   categoryCode: string;
   distanceKm: number | null;
@@ -36,7 +36,7 @@ export interface PlaceDetailResponse {
 const convertToStoreData = (data: PlaceDetailResponse): StoreData => {
   return {
     placeId: data.placeId,
-    name: data.name,
+    name: data.placeName,
     address: data.address,
     category: data.categoryCode,
     distance: data.distanceKm !== null && data.distanceKm !== undefined && typeof data.distanceKm === 'number' && !isNaN(data.distanceKm) ? `${data.distanceKm.toFixed(1)}km` : '거리 정보 없음',

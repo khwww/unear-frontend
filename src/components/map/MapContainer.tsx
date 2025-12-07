@@ -72,7 +72,7 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
     const roadviewRef = useRef<KakaoRoadview | null>(null);
     const roadviewClientRef = useRef<KakaoRoadviewClient | null>(null);
     const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-    
+
     // 디바운싱을 위한 ref
     const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -366,7 +366,7 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
-      
+
       // 500ms 후에 실행
       debounceTimeoutRef.current = setTimeout(() => {
         renderMarkers();
