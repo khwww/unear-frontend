@@ -152,14 +152,14 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
   }, [isOpen, activeTab]);
 
   const expiringSoonCoupons = Array.isArray(coupons) ? coupons.filter(isExpiringSoon) : [];
-  
+
   // 디버깅 로그 추가
   console.log('🔍 BottomSheetCoupon Debug:');
   console.log('  - activeTab:', activeTab);
   console.log('  - coupons:', coupons, 'isArray:', Array.isArray(coupons));
   console.log('  - nearbyStores:', nearbyStores, 'isArray:', Array.isArray(nearbyStores));
   console.log('  - expiringSoonCoupons:', expiringSoonCoupons);
-  
+
   // nearbyStores 내부 구조 확인
   if (nearbyStores && nearbyStores.length > 0) {
     console.log('🔍 nearbyStores 첫 번째 객체:', nearbyStores[0]);
@@ -294,57 +294,59 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
                     </div>
                   </div>
                   <div className="flex flex-col items-center gap-[23px]">
-                    {nearbyStores && Array.isArray(nearbyStores) ? nearbyStores.map((store) => {
-                      const now = new Date();
-                      const currentHour = now.getHours();
-                      const openHour = Number(store.startTime);
-                      const closeHour = Number(store.endTime);
+                    {nearbyStores && Array.isArray(nearbyStores) ? (
+                      nearbyStores.map((store) => {
+                        const now = new Date();
+                        const currentHour = now.getHours();
+                        const openHour = Number(store.startTime);
+                        const closeHour = Number(store.endTime);
 
-                      const isOpen = currentHour >= openHour && currentHour < closeHour;
-                      const status: StoreStatusType = isOpen ? '영업중' : '영업종료';
+                        const isOpen = currentHour >= openHour && currentHour < closeHour;
+                        const status: StoreStatusType = isOpen ? '영업중' : '영업종료';
 
-                      return (
-                        <StoreCouponCard
-                          key={`${store.placeId}-${store.favorite}`}
-                          store={{
-                            id: String(store.placeId),
-                            name: store.name,
-                            address: store.address,
-                            distance: `${store.distanceKm}km`,
-                            hours: `${store.startTime}:00 - ${store.endTime}:00`,
-                            category: store.categoryCode as CategoryType,
-                            status,
-                            isBookmarked: store.favorite,
-                            latitude: store.latitude,
-                            longitude: store.longitude,
-                            tel: store.tel,
-                            coupons: (store.coupons || []).map((coupon: NearbyCoupon) => ({
-                              id: String(coupon.couponTemplateId),
-                              title: coupon.couponName,
-                              expiryDate: coupon.couponEnd.split('T')[0].replace(/-/g, '.'),
-                              downloaded: coupon.downloaded,
-                              userCouponId: coupon.userCouponId,
-                              discountCode: coupon.discountCode,
-                              membershipCode: coupon.membershipCode,
-                              discountInfo: coupon.discountInfo,
-                            })),
-                          }}
-                          onLocationClick={(lat, lng) => {
-                            if (!mapRef.current) return;
+                        return (
+                          <StoreCouponCard
+                            key={`${store.placeId}-${store.favorite}`}
+                            store={{
+                              id: String(store.placeId),
+                              name: store.name,
+                              address: store.address,
+                              distance: `${store.distanceKm}km`,
+                              hours: `${store.startTime}:00 - ${store.endTime}:00`,
+                              category: store.categoryCode as CategoryType,
+                              status,
+                              isBookmarked: store.favorite,
+                              latitude: store.latitude,
+                              longitude: store.longitude,
+                              tel: store.tel,
+                              coupons: (store.coupons || []).map((coupon: NearbyCoupon) => ({
+                                id: String(coupon.couponTemplateId),
+                                title: coupon.couponName,
+                                expiryDate: coupon.couponEnd.split('T')[0].replace(/-/g, '.'),
+                                downloaded: coupon.downloaded,
+                                userCouponId: coupon.userCouponId,
+                                discountCode: coupon.discountCode,
+                                membershipCode: coupon.membershipCode,
+                                discountInfo: coupon.discountInfo,
+                              })),
+                            }}
+                            onLocationClick={(lat, lng) => {
+                              if (!mapRef.current) return;
 
-                            mapRef.current.setSelectedMarker(Number(store.placeId));
+                              mapRef.current.setSelectedMarker(Number(store.placeId));
 
-                            mapRef.current.setCenter(lat, lng);
-                            mapRef.current.setLevel(1);
-                            onClose();
-                            onMarkerClick(Number(store.placeId), String(lat), String(lng));
-                          }}
-                          onBookmarkToggle={handleBookmarkToggle}
-                          onCouponDownloaded={handleCouponDownloaded}
-                          onCouponClick={handleCardClick}
-                        />
-                      );
-                    }) : (
+                              mapRef.current.setCenter(lat, lng);
+                              mapRef.current.setLevel(1);
+                              onClose();
+                              onMarkerClick(Number(store.placeId), String(lat), String(lng));
+                            }}
+                            onBookmarkToggle={handleBookmarkToggle}
+                            onCouponDownloaded={handleCouponDownloaded}
+                            onCouponClick={handleCardClick}
+                          />
+                        );
+                      })
+                    ) : (
                       <div className="flex justify-center items-center py-8">
                         <EmptyState message="주변에 매장이 없어요" />
                       </div>

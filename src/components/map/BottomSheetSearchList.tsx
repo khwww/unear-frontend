@@ -52,7 +52,7 @@ const BottomSheetSearchList = ({
         console.log('🔍 BottomSheetSearchList Debug:');
         console.log('  - results:', results, 'isArray:', Array.isArray(results));
         console.log('  - results.length:', results?.length);
-        
+
         const promises = results.map((place) =>
           getPlaceDetail(place.placeId, currentLat, currentLng)
         );
