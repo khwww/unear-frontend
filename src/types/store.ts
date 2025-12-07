@@ -12,7 +12,7 @@ export interface NearbyCoupon {
 
 export interface NearbyStore {
   placeId: number;
-  name: string;
+  placeName: string;
   address: string;
   categoryCode: string;
   distanceKm: number | null;

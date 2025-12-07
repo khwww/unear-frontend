@@ -309,7 +309,7 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
                             key={`${store.placeId}-${store.favorite}`}
                             store={{
                               id: String(store.placeId),
-                              name: store.name,
+                              name: store.placeName,
                               address: store.address,
                               distance: `${store.distanceKm}km`,
                               hours: `${store.startTime}:00 - ${store.endTime}:00`,
