@@ -16,26 +16,33 @@ import { getPlaceDetail } from '@/apis/getPlaceDetail';
 import type { StoreData } from '@/types/storeDetail';
 import { getPlacesForSearch } from '@/apis/getPlaces';
 import BottomSheetSearchList from '@/components/map/BottomSheetSearchList';
-import type { Place } from '@/types/map';
 import { showInfoToast } from '@/utils/toast';
+import { useMapFilter, useMapSearch } from '@/hooks/map';
 
 const MapPage = () => {
   const location = useLocation();
-  const [isBookmarkOnly, setIsBookmarkOnly] = useState<boolean>(() => {
-    const stored = localStorage.getItem('isBookmarkOnly');
-    return stored ? JSON.parse(stored) : false;
-  });
-  const [categoryCodes, setCategoryCodes] = useState<string[]>(() => {
-    const stored = localStorage.getItem('categoryCodes');
-    return stored ? JSON.parse(stored) : [];
-  });
-
-  const [benefitCategories, setBenefitCategories] = useState<string[]>(() => {
-    const stored = localStorage.getItem('benefitCategories');
-    return stored ? JSON.parse(stored) : [];
-  });
   const mapRef = useRef<MapContainerRef | null>(null);
 
+  // 커스텀 훅 사용
+  const { isBookmarkOnly, categoryCodes, benefitCategories, toggleBookmark, applyFilter } =
+    useMapFilter();
+
+  const {
+    searchResults,
+    searchKeyword,
+    isSearchOpen,
+    currentLat,
+    currentLng,
+    handleSearch,
+    setSearchKeyword,
+    setSearchOpen,
+    setSearchResults,
+    setCurrentLat,
+    setCurrentLng,
+    closeSearch,
+  } = useMapSearch({ mapRef });
+
+  // UI 상태
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isEventOpen, setIsEventOpen] = useState(false);
   const [isBarcodeOpen, setIsBarcodeOpen] = useState(false);
@@ -45,33 +52,10 @@ const MapPage = () => {
   const [userLocation, setUserLocation] = useState<{ latitude: string; longitude: string } | null>(
     null
   );
-  const [searchResults, setSearchResults] = useState<Place[]>([]);
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [isSearchOpen, setSearchOpen] = useState(false);
-  const [currentLat, setCurrentLat] = useState<number | null>(null);
-  const [currentLng, setCurrentLng] = useState<number | null>(null);
   const [isLoadviewActive, setIsLoadviewActive] = useState(false);
   const [isRoadviewOpen, setIsRoadviewOpen] = useState(false);
 
-  useEffect(() => {
-    if (isRoadviewOpen) {
-      // 로드뷰가 열렸을 때
-    }
-  }, [isRoadviewOpen]);
-
-  const ALL_CATEGORY_CODES = [
-    'FOOD',
-    'CAFE',
-    'BAKERY',
-    'LIFE',
-    'ACTIVITY',
-    'EDUCATION',
-    'CULTURE',
-    'SHOPPING',
-    'CAFE',
-    'BEAUTY',
-  ];
-  const ALL_BENEFIT_CODES = ['할인', '적립', '무료서비스', '상품 증정'];
+  // 사용자 정보
   const { getUserDisplayName, getUserGrade, getBarcodeNumber } = useAuthStore();
   const displayName = getUserDisplayName();
   const userGrade = getUserGrade();
@@ -79,33 +63,19 @@ const MapPage = () => {
   const gradeForComponent = userGrade === 'BASIC' ? '우수' : userGrade;
 
   useEffect(() => {
-    localStorage.setItem('isBookmarkOnly', JSON.stringify(isBookmarkOnly));
-  }, [isBookmarkOnly]);
-
-  useEffect(() => {
-    if (categoryCodes.length === 0 || categoryCodes.length === ALL_CATEGORY_CODES.length) {
-      localStorage.removeItem('categoryCodes');
-    } else {
-      localStorage.setItem('categoryCodes', JSON.stringify(categoryCodes));
+    if (isRoadviewOpen) {
+      // 로드뷰가 열렸을 때
     }
-  }, [categoryCodes]);
-
-  useEffect(() => {
-    if (benefitCategories.length === 0 || benefitCategories.length === ALL_BENEFIT_CODES.length) {
-      localStorage.removeItem('benefitCategories');
-    } else {
-      localStorage.setItem('benefitCategories', JSON.stringify(benefitCategories));
-    }
-  }, [benefitCategories]);
+  }, [isRoadviewOpen]);
 
   // 필터링 상태가 변경될 때마다 지도 마커를 다시 렌더링
   useEffect(() => {
     if (mapRef.current) {
-      // 즉시 마커를 다시 렌더링
       mapRef.current?.fetchPlaces?.();
     }
   }, [categoryCodes, benefitCategories, isBookmarkOnly]);
 
+  // 외부에서 매장으로 포커스할 때 처리
   useEffect(() => {
     const focusStore = location.state?.focusStore;
     if (focusStore) {
@@ -131,7 +101,9 @@ const MapPage = () => {
                 String(focusStore.longitude)
               );
             }, 600);
-          } catch (error) {}
+          } catch {
+            // 에러 처리
+          }
         };
 
         setTimeout(() => {
@@ -198,7 +170,7 @@ const MapPage = () => {
             } else {
               showInfoToast(`'${focusStore.placeName}' 매장을 찾을 수 없습니다.`);
             }
-          } catch (error) {
+          } catch {
             showInfoToast('매장 검색 중 오류가 발생했습니다.');
           }
         };
@@ -207,8 +179,16 @@ const MapPage = () => {
       }
       window.history.replaceState({}, document.title);
     }
-  }, [location.state]);
+  }, [
+    location.state,
+    setSearchKeyword,
+    setCurrentLat,
+    setCurrentLng,
+    setSearchResults,
+    setSearchOpen,
+  ]);
 
+  // 매장 새로고침 이벤트 리스너
   useEffect(() => {
     const handleRefreshStores = () => {
       mapRef.current?.fetchPlaces();
@@ -229,52 +209,6 @@ const MapPage = () => {
     mapRef.current?.setLevel(6);
   };
 
-  const handleSearch = async (keyword: string) => {
-    if (!keyword.trim()) return;
-    setSearchKeyword(keyword);
-    setSearchOpen(true);
-
-    const map = mapRef.current;
-    if (!map || !map.getBounds) return;
-
-    const bounds = map.getBounds?.();
-    if (!bounds) return;
-
-    const sw = bounds.getSouthWest();
-    const ne = bounds.getNorthEast();
-
-    const centerLat = (sw.getLat() + ne.getLat()) / 2;
-    const centerLng = (sw.getLng() + ne.getLng()) / 2;
-
-    setCurrentLat(centerLat);
-    setCurrentLng(centerLng);
-
-    const delta = 0.09;
-
-    const swLat = centerLat - delta;
-    const swLng = centerLng - delta;
-    const neLat = centerLat + delta;
-    const neLng = centerLng + delta;
-
-    try {
-      const results = await getPlacesForSearch({
-        keyword,
-        southWestLatitude: swLat,
-        southWestLongitude: swLng,
-        northEastLatitude: neLat,
-        northEastLongitude: neLng,
-      });
-
-      if (results.length === 0) {
-        showInfoToast(`주변에 '${keyword}' 에 대한 검색 결과가 없습니다.`);
-        return;
-      }
-
-      setSearchResults(results);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_e) {}
-  };
-
   const handleMarkerClick = async (placeId: number, _storeLat: string, _storeLng: string) => {
     try {
       navigator.geolocation.getCurrentPosition(
@@ -287,9 +221,27 @@ const MapPage = () => {
           setSelectedStore(storeDetail);
           setIsBottomSheetOpen(true);
         },
-        (_err) => {}
+        () => {
+          // 위치 권한 거부 처리
+        }
       );
-    } catch (error) {}
+    } catch {
+      // 에러 처리
+    }
+  };
+
+  const handleToggleBookmark = () => {
+    toggleBookmark();
+    setTimeout(() => {
+      mapRef.current?.fetchPlaces?.();
+    }, 0);
+  };
+
+  const handleApplyFilter = (categories: string[], benefits: string[]) => {
+    applyFilter(categories, benefits);
+    setTimeout(() => {
+      mapRef.current?.fetchPlaces?.();
+    }, 0);
   };
 
   return (
@@ -334,15 +286,7 @@ const MapPage = () => {
       {!isRoadviewOpen && (
         <MapTopRightButtons
           onToggleFilter={() => setIsFilterOpen(true)}
-          onToggleBookmark={() => {
-            const newValue = !isBookmarkOnly;
-            setIsBookmarkOnly(newValue);
-
-            // 즉시 지도 마커를 다시 렌더링
-            setTimeout(() => {
-              mapRef.current?.fetchPlaces?.();
-            }, 0);
-          }}
+          onToggleBookmark={handleToggleBookmark}
           onToggleLoadview={(isActive) => {
             setIsLoadviewActive(isActive);
             mapRef.current?.toggleLoadview?.(isActive);
@@ -375,15 +319,7 @@ const MapPage = () => {
       <BottomSheetFilter
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
-        onApply={(categories, benefits) => {
-          setCategoryCodes(categories);
-          setBenefitCategories(benefits);
-
-          // 상태 업데이트 후 즉시 지도 마커를 다시 렌더링
-          setTimeout(() => {
-            mapRef.current?.fetchPlaces?.();
-          }, 0);
-        }}
+        onApply={handleApplyFilter}
         selectedCategoryCodes={categoryCodes}
         selectedBenefitCategories={benefitCategories}
       />
@@ -408,15 +344,12 @@ const MapPage = () => {
           results={searchResults}
           keyword={searchKeyword}
           isOpen={isSearchOpen}
-          onClose={() => {
-            setSearchOpen(false);
-            setSearchResults([]);
-          }}
+          onClose={closeSearch}
           currentLat={String(currentLat)}
           currentLng={String(currentLng)}
-          onBookmarkToggle={(_placeId) => {}}
+          onBookmarkToggle={() => {}}
           onCouponDownloaded={() => {}}
-          onCouponClick={(_userCouponId, _brand) => {}}
+          onCouponClick={() => {}}
           mapRef={mapRef}
           onMarkerClick={handleMarkerClick}
         />
