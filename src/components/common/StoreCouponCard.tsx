@@ -20,7 +20,7 @@ interface Coupon {
   title: string;
   expiryDate: string;
   downloaded?: boolean;
-  userCouponId: number | null;
+  userCouponId: string | null;
   discountCode: 'COUPON_FIXED' | 'COUPON_PERCENT';
   membershipCode: string;
   discountInfo: string | null;
@@ -46,7 +46,7 @@ interface StoreCouponCardProps {
   onBookmarkToggle?: (storeId: string, isBookmarked: boolean) => void;
   onLocationClick?: (lat: number, lng: number) => void;
   onCouponDownloaded?: () => void;
-  onCouponClick?: (couponId: number) => void;
+  onCouponClick?: (couponId: string) => void;
   className?: string;
 }
 
@@ -71,7 +71,7 @@ const StoreCouponCard: React.FC<StoreCouponCardProps> = ({
     setDownloadingCoupons((prev) => new Set(prev).add(couponId));
 
     try {
-      await postDownloadCoupon(Number(couponId));
+      await postDownloadCoupon(couponId);
       showToast('쿠폰 다운로드 완료');
 
       // UI 상태 갱신
@@ -193,7 +193,9 @@ const StoreCouponCard: React.FC<StoreCouponCardProps> = ({
                   ? 'cursor-pointer hover:bg-gray-50 transition-colors'
                   : 'cursor-default'
               }`}
-              onClick={() => coupon.userCouponId && onCouponClick?.(coupon.userCouponId)}
+              onClick={() => {
+                if (coupon.userCouponId) onCouponClick?.(coupon.userCouponId);
+              }}
             >
               <div className="absolute left-3 top-3">
                 <CouponIcon />

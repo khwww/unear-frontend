@@ -47,7 +47,7 @@ const BottomSheetLocationDetail: React.FC<BottomSheetLocationDetailProps> = ({
     setDownloadingCoupons((prev) => new Set(prev).add(couponId));
 
     try {
-      await postDownloadCoupon(Number(couponId));
+      await postDownloadCoupon(couponId);
       setDownloadedCoupons((prev) => new Set(prev).add(couponId));
 
       // 쿠폰 다운로드 후 store 최신화
@@ -74,7 +74,7 @@ const BottomSheetLocationDetail: React.FC<BottomSheetLocationDetailProps> = ({
   };
 
   // 쿠폰 클릭 시 상세 정보 불러오기
-  const handleCouponClick = async (userCouponId: number | null) => {
+  const handleCouponClick = async (userCouponId: string | null) => {
     if (userCouponId == null) return;
 
     try {
@@ -101,6 +101,13 @@ const BottomSheetLocationDetail: React.FC<BottomSheetLocationDetailProps> = ({
     }
   };
   useEffect(() => {
+    console.log('🔍 BottomSheetLocationDetail Debug:');
+    console.log('  - store:', store);
+    console.log('  - store.coupons:', store.coupons);
+    console.log('  - coupons length:', store.coupons?.length);
+    if (store.coupons && store.coupons.length > 0) {
+      console.log('  - 첫 번째 쿠폰:', store.coupons[0]);
+    }
     setLocalStore(store);
   }, [store]);
 
@@ -250,7 +257,7 @@ const BottomSheetLocationDetail: React.FC<BottomSheetLocationDetailProps> = ({
       </div>
       {selectedCoupon && (
         <CouponModal
-          brand={selectedCoupon.brandName}
+          brand={selectedCoupon.brandName ?? ''}
           title={selectedCoupon.couponName}
           discountRate={
             selectedCoupon.discountCode === 'COUPON_PERCENT'

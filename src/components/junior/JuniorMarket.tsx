@@ -195,7 +195,7 @@ const JuniorMarket = () => {
     setDownloadingCoupons((prev) => new Set(prev).add(couponTemplateId));
 
     try {
-      await postDownloadCoupon(Number(couponTemplateId));
+      await postDownloadCoupon(couponTemplateId);
       setDownloadedCoupons((prev) => new Set(prev).add(couponTemplateId));
     } catch (err) {
       alert('쿠폰 다운로드에 실패했습니다.');

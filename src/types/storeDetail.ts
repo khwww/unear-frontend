@@ -13,7 +13,7 @@ export interface Coupon {
   discountInfo: string | null;
   couponStart: string;
   couponEnd: string;
-  userCouponId: number | null;
+  userCouponId: string | null;
   downloaded: boolean;
 }
 

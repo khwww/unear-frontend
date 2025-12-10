@@ -349,7 +349,7 @@ const MapPage = () => {
           currentLng={String(currentLng)}
           onBookmarkToggle={() => {}}
           onCouponDownloaded={() => {}}
-          onCouponClick={() => {}}
+          onCouponClick={(_userCouponId: string, _brand: string) => {}}
           mapRef={mapRef}
           onMarkerClick={handleMarkerClick}
         />

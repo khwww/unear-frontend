@@ -39,7 +39,7 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
   const [isLoadingNearbyStores, setIsLoadingNearbyStores] = useState(false);
   const [locationError, setLocationError] = useState(false);
 
-  const handleCardClick = async (couponId: number) => {
+  const handleCardClick = async (couponId: string) => {
     try {
       const brandName = coupons.find((c) => c.userCouponId === couponId)?.name ?? '';
       setSelectedBrand(brandName);
@@ -152,19 +152,6 @@ const BottomSheetCoupon = ({ isOpen, onClose, mapRef, onMarkerClick }: BottomShe
   }, [isOpen, activeTab]);
 
   const expiringSoonCoupons = Array.isArray(coupons) ? coupons.filter(isExpiringSoon) : [];
-
-  // 디버깅 로그 추가
-  console.log('🔍 BottomSheetCoupon Debug:');
-  console.log('  - activeTab:', activeTab);
-  console.log('  - coupons:', coupons, 'isArray:', Array.isArray(coupons));
-  console.log('  - nearbyStores:', nearbyStores, 'isArray:', Array.isArray(nearbyStores));
-  console.log('  - expiringSoonCoupons:', expiringSoonCoupons);
-
-  // nearbyStores 내부 구조 확인
-  if (nearbyStores && nearbyStores.length > 0) {
-    console.log('🔍 nearbyStores 첫 번째 객체:', nearbyStores[0]);
-    console.log('🔍 nearbyStores 첫 번째 객체의 coupons:', nearbyStores[0]?.coupons);
-  }
 
   return (
     <>

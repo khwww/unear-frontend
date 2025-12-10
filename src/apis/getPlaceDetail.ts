@@ -59,7 +59,7 @@ const convertToStoreData = (data: PlaceDetailResponse): StoreData => {
       discountInfo: c.discountInfo,
       couponStart: c.couponStart,
       couponEnd: c.couponEnd,
-      userCouponId: c.userCouponId,
+      userCouponId: c.userCouponId !== null ? String(c.userCouponId) : null,
       downloaded: c.downloaded,
     })) : [],
   };
@@ -79,9 +79,18 @@ export const getPlaceDetail = async (
 
   const data: PlaceDetailResponse | undefined = response.data?.data;
 
+  console.log('🔍 getPlaceDetail API Debug:');
+  console.log('  - placeId:', placeId);
+  console.log('  - raw response.data:', response.data);
+  console.log('  - data:', data);
+  console.log('  - data.coupons:', data?.coupons);
+
   if (!data) {
     throw new Error('❌ 상세 정보 데이터가 없습니다 (data is null)');
   }
 
-  return convertToStoreData(data);
+  const result = convertToStoreData(data);
+  console.log('  - converted result.coupons:', result.coupons);
+
+  return result;
 };

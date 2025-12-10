@@ -22,7 +22,7 @@ interface Props {
   currentLng: string;
   onBookmarkToggle: (placeId: number) => void;
   onCouponDownloaded: () => void;
-  onCouponClick: (userCouponId: number, brand: string) => void;
+  onCouponClick: (userCouponId: string, brand: string) => void;
   mapRef: React.RefObject<MapContainerRef | null>;
   onMarkerClick: (placeId: number, lat: string, lng: string) => void;
 }
@@ -68,7 +68,7 @@ const BottomSheetSearchList = ({
     if (isOpen && results.length > 0) fetchDetails();
   }, [isOpen, results, currentLat, currentLng]);
 
-  const handleCardClick = async (userCouponId: number, brand: string) => {
+  const handleCardClick = async (userCouponId: string, brand: string) => {
     try {
       setSelectedBrand(brand);
       const detail = await getUserCouponDetail(userCouponId);

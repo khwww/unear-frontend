@@ -23,11 +23,11 @@ interface AxiosError {
 
 /**
  * 특정 유저 쿠폰 상세 정보 조회 API
- * @param userCouponId - 쿠폰 ID
- * @returns UserCouponDetail 상세 정보 (CouponItem 기반)
+ * @param userCouponId - 쿠폰 ID (string)
+ * @returns UserCouponDetail 상세 정보
  */
 export const getUserCouponDetail = async (
-  userCouponId: number
+  userCouponId: string
 ): Promise<UserCouponDetail | null> => {
   try {
     const response = await axiosInstance.get(`/coupons/me/${userCouponId}`, {
