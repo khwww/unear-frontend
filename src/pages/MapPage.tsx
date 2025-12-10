@@ -18,6 +18,7 @@ import { getPlacesForSearch } from '@/apis/getPlaces';
 import BottomSheetSearchList from '@/components/map/BottomSheetSearchList';
 import { showInfoToast } from '@/utils/toast';
 import { useMapFilter, useMapSearch } from '@/hooks/map';
+import { dispatchRefreshMarkers } from '@/contexts/MapContext';
 
 const MapPage = () => {
   const location = useLocation();
@@ -70,9 +71,7 @@ const MapPage = () => {
 
   // 필터링 상태가 변경될 때마다 지도 마커를 다시 렌더링
   useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current?.fetchPlaces?.();
-    }
+    dispatchRefreshMarkers();
   }, [categoryCodes, benefitCategories, isBookmarkOnly]);
 
   // 외부에서 매장으로 포커스할 때 처리
@@ -188,18 +187,6 @@ const MapPage = () => {
     setSearchOpen,
   ]);
 
-  // 매장 새로고침 이벤트 리스너
-  useEffect(() => {
-    const handleRefreshStores = () => {
-      mapRef.current?.fetchPlaces();
-    };
-
-    window.addEventListener('refreshMapStores', handleRefreshStores);
-    return () => {
-      window.removeEventListener('refreshMapStores', handleRefreshStores);
-    };
-  }, []);
-
   const handleCurrentLocation = () => {
     mapRef.current?.showCurrentLocation();
   };
@@ -233,14 +220,14 @@ const MapPage = () => {
   const handleToggleBookmark = () => {
     toggleBookmark();
     setTimeout(() => {
-      mapRef.current?.fetchPlaces?.();
+      dispatchRefreshMarkers();
     }, 0);
   };
 
   const handleApplyFilter = (categories: string[], benefits: string[]) => {
     applyFilter(categories, benefits);
     setTimeout(() => {
-      mapRef.current?.fetchPlaces?.();
+      dispatchRefreshMarkers();
     }, 0);
   };
 

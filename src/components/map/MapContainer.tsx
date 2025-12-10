@@ -286,6 +286,20 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
       };
     }, [renderMarkers]);
 
+    // refreshMapStores 이벤트 구독
+    useEffect(() => {
+      const handleRefreshMarkers = () => {
+        if (mapInstanceRef.current) {
+          renderMarkers();
+        }
+      };
+
+      window.addEventListener('refreshMapStores', handleRefreshMarkers);
+      return () => {
+        window.removeEventListener('refreshMapStores', handleRefreshMarkers);
+      };
+    }, [renderMarkers]);
+
     // 컴포넌트 언마운트 시 타이머 정리
     useEffect(() => {
       return () => {
@@ -296,7 +310,13 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
     }, []);
 
     return (
-      <MapProvider value={{ map: mapInstance, clusterer: clustererRef.current }}>
+      <MapProvider
+        value={{
+          map: mapInstance,
+          clusterer: clustererRef.current,
+          refreshMarkers: renderMarkers,
+        }}
+      >
         <div ref={mapRef} className="w-full h-full absolute top-0 left-0 z-0">
           {mapInstance && (
             <EventAreaCircle center={{ lat: 37.544581, lng: 127.055961 }} radius={800} />
