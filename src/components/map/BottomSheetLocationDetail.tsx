@@ -19,14 +19,12 @@ import { toggleFavorite } from '@/apis/postFavorite';
 import { getUserCouponDetail } from '@/apis/getUserCouponDetail';
 import CouponModal from '../common/CouponModal';
 import type { UserCouponDetail } from '@/types/coupon';
-import { getPlaceDetail } from '@/apis/getPlaceDetail';
 
 interface BottomSheetLocationDetailProps {
   isOpen: boolean;
   onClose: () => void;
   store: StoreData;
   mapRef: React.RefObject<MapContainerRef | null>;
-  userLocation: { latitude: string; longitude: string };
 }
 
 const BottomSheetLocationDetail: React.FC<BottomSheetLocationDetailProps> = ({
@@ -34,7 +32,6 @@ const BottomSheetLocationDetail: React.FC<BottomSheetLocationDetailProps> = ({
   onClose,
   store,
   mapRef,
-  userLocation,
 }) => {
   const [downloadedCoupons, setDownloadedCoupons] = useState<Set<string>>(new Set());
   const [downloadingCoupons, setDownloadingCoupons] = useState<Set<string>>(new Set());
@@ -43,27 +40,32 @@ const BottomSheetLocationDetail: React.FC<BottomSheetLocationDetailProps> = ({
   const [selectedCoupon, setSelectedCoupon] = useState<UserCouponDetail | null>(null);
   const [localStore, setLocalStore] = useState(store);
 
-  const handleCouponDownload = async (couponId: string) => {
-    setDownloadingCoupons((prev) => new Set(prev).add(couponId));
+  const handleCouponDownload = async (couponTemplateId: string) => {
+    setDownloadingCoupons((prev) => new Set(prev).add(couponTemplateId));
 
     try {
-      await postDownloadCoupon(couponId);
-      setDownloadedCoupons((prev) => new Set(prev).add(couponId));
+      const downloadResponse = await postDownloadCoupon(couponTemplateId);
+      setDownloadedCoupons((prev) => new Set(prev).add(couponTemplateId));
 
-      // 쿠폰 다운로드 후 store 최신화
-      const updated = await getPlaceDetail(
-        store.placeId,
-        String(userLocation.latitude),
-        String(userLocation.longitude)
-      );
-      if (updated) {
-        setLocalStore(updated);
-      }
+      // 다운로드 응답의 userCouponId를 사용하여 localStore 업데이트
+      setLocalStore((prev) => ({
+        ...prev,
+        coupons: prev.coupons.map((coupon) =>
+          String(coupon.couponTemplateId) === couponTemplateId
+            ? {
+                ...coupon,
+                userCouponId: downloadResponse.userCouponId,
+                downloaded: true,
+              }
+            : coupon
+        ),
+      }));
     } catch (err) {
+      console.error('쿠폰 다운로드 실패:', err);
     } finally {
       setDownloadingCoupons((prev) => {
         const newSet = new Set(prev);
-        newSet.delete(couponId);
+        newSet.delete(couponTemplateId);
         return newSet;
       });
     }
@@ -218,7 +220,8 @@ const BottomSheetLocationDetail: React.FC<BottomSheetLocationDetailProps> = ({
                       {coupon.couponName}
                     </h4>
                     <p className="text-xs text-gray-400 mt-[2px]">
-                      {coupon.couponEnd?.split('T')[0]} 까지
+                      {typeof coupon.couponEnd === 'string' ? coupon.couponEnd.split('T')[0] : ''}{' '}
+                      까지
                     </p>
                   </div>
 

@@ -78,13 +78,10 @@ const BottomSheetSearchList = ({
     } catch (err) {}
   };
 
-  const handleCouponDownloaded = async (placeId: number) => {
-    try {
-      const updated = await getPlaceDetail(placeId, currentLat, currentLng);
-      setStoreList((prev) => prev.map((store) => (store.placeId === placeId ? updated : store)));
-
-      onCouponDownloaded();
-    } catch (err) {}
+  const handleCouponDownloaded = () => {
+    // StoreCouponCard에서 이미 로컬 상태로 쿠폰 다운로드 상태를 관리하므로
+    // 여기서는 부모 컴포넌트에 알림만 전달
+    onCouponDownloaded();
   };
 
   const handleBookmarkToggle = async (placeId: number) => {
@@ -179,7 +176,7 @@ const BottomSheetSearchList = ({
                     onMarkerClick(store.placeId, String(lat), String(lng));
                   }}
                   onBookmarkToggle={() => handleBookmarkToggle(store.placeId)}
-                  onCouponDownloaded={() => handleCouponDownloaded(store.placeId)}
+                  onCouponDownloaded={handleCouponDownloaded}
                   onCouponClick={(userCouponId) => handleCardClick(userCouponId, store.name)}
                 />
               );

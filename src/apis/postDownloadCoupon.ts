@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 import type { CouponStatusCode } from '@/types/coupon';
 
-interface DownloadCouponResponse {
+export interface DownloadCouponResponse {
   userCouponId: string;
   userId: string;
   couponTemplateId: string;

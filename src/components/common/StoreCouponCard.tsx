@@ -59,25 +59,32 @@ const StoreCouponCard: React.FC<StoreCouponCardProps> = ({
   className = '',
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [downloadedCoupons, setDownloadedCoupons] = useState<Set<string>>(new Set());
   const [downloadingCoupons, setDownloadingCoupons] = useState<Set<string>>(new Set());
   const [localBookmarked, setLocalBookmarked] = useState(store.isBookmarked);
+  const [localCoupons, setLocalCoupons] = useState(store.coupons);
 
   useEffect(() => {
     setLocalBookmarked(store.isBookmarked);
   }, [store.isBookmarked]);
 
+  useEffect(() => {
+    setLocalCoupons(store.coupons);
+  }, [store.coupons]);
+
   const handleCouponDownload = async (couponId: string) => {
     setDownloadingCoupons((prev) => new Set(prev).add(couponId));
 
     try {
-      await postDownloadCoupon(couponId);
+      const downloadResponse = await postDownloadCoupon(couponId);
       showToast('쿠폰 다운로드 완료');
 
-      // UI 상태 갱신
-      setDownloadedCoupons((prev) => new Set(prev).add(couponId));
-      store.coupons = (store.coupons || []).map((coupon) =>
-        coupon.id === couponId ? { ...coupon, downloaded: true } : coupon
+      // 로컬 상태 업데이트 - userCouponId 포함
+      setLocalCoupons((prev) =>
+        prev.map((coupon) =>
+          coupon.id === couponId
+            ? { ...coupon, downloaded: true, userCouponId: downloadResponse.userCouponId }
+            : coupon
+        )
       );
 
       onCouponDownloaded?.();
@@ -168,7 +175,7 @@ const StoreCouponCard: React.FC<StoreCouponCardProps> = ({
         <div className="flex items-center gap-2">
           <div className="w-[10px] h-[10px] bg-green-400 rounded-full" />
           <span className="font-semibold text-sm text-black leading-none relative top-[1px]">
-            사용 가능한 쿠폰 {store.coupons.length}개
+            사용 가능한 쿠폰 {localCoupons.length}개
           </span>
         </div>
 
@@ -185,7 +192,7 @@ const StoreCouponCard: React.FC<StoreCouponCardProps> = ({
       {/* 쿠폰 목록 */}
       {isExpanded && (
         <div className="mt-[14px] space-y-[10px]">
-          {(store.coupons || []).map((coupon) => (
+          {localCoupons.map((coupon) => (
             <div
               key={coupon.id}
               className={`relative bg-white border border-[#D4D4D8] rounded-[5px] p-3 w-full h-[46px] ${
@@ -206,9 +213,12 @@ const StoreCouponCard: React.FC<StoreCouponCardProps> = ({
                   {coupon.expiryDate} 까지
                 </p>
               </div>
-              {!coupon.downloaded && !downloadedCoupons.has(coupon.id) && (
+              {!coupon.downloaded && (
                 <button
-                  onClick={() => handleCouponDownload(coupon.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCouponDownload(coupon.id);
+                  }}
                   className="absolute right-3 top-[13px] w-5 h-5 flex items-center justify-center"
                   disabled={downloadingCoupons.has(coupon.id)}
                 >

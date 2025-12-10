@@ -1,7 +1,8 @@
-// src/apis/getPlaceDetail.ts (수정된 최종 코드)
+// src/apis/getPlaceDetail.ts
 
 import axiosInstance from './axiosInstance';
-import type { StoreData } from '@/types/storeDetail';
+import type { StoreData, Coupon } from '@/types/storeDetail';
+import { getPlaceCoupons } from './getPlaceCoupons';
 
 export interface PlaceDetailResponse {
   placeId: number;
@@ -90,7 +91,41 @@ export const getPlaceDetail = async (
   }
 
   const result = convertToStoreData(data);
-  console.log('  - converted result.coupons:', result.coupons);
+
+  // 장소별 쿠폰 조회 API 호출
+  const placeCoupons = await getPlaceCoupons(placeId);
+  console.log('🔍 getPlaceCoupons result:', placeCoupons);
+
+  // 날짜 객체를 문자열로 변환하는 헬퍼 함수
+  const convertDateToString = (
+    dateValue: string | { year: number; monthValue: number; dayOfMonth: number } | null | undefined
+  ): string => {
+    if (!dateValue) return '';
+    if (typeof dateValue === 'string') return dateValue;
+    if (typeof dateValue === 'object' && 'year' in dateValue) {
+      const { year, monthValue, dayOfMonth } = dateValue;
+      const month = String(monthValue).padStart(2, '0');
+      const day = String(dayOfMonth).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    return '';
+  };
+
+  // PlaceCoupon을 Coupon 형식으로 변환 (백엔드에서 다운로드 상태 포함)
+  const convertedCoupons: Coupon[] = placeCoupons.map((pc) => ({
+    couponTemplateId: Number(pc.couponTemplateId),
+    couponName: pc.couponName,
+    discountCode: pc.discountCode as 'COUPON_PERCENT' | 'COUPON_FIXED',
+    membershipCode: pc.membershipCode,
+    discountInfo: null,
+    couponStart: convertDateToString(pc.couponStart as string | { year: number; monthValue: number; dayOfMonth: number }),
+    couponEnd: convertDateToString(pc.couponEnd as string | { year: number; monthValue: number; dayOfMonth: number }),
+    userCouponId: pc.userCouponId,
+    downloaded: pc.downloaded,
+  }));
+
+  result.coupons = convertedCoupons;
+  console.log('  - final result.coupons:', result.coupons);
 
   return result;
 };

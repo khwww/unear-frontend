@@ -92,4 +92,7 @@ export interface PlaceCoupon {
   isDeleted: boolean;
   unearEventId: string;
   placeId: string;
+  // 로그인 사용자인 경우 다운로드 정보 포함
+  userCouponId: string | null;
+  downloaded: boolean;
 }

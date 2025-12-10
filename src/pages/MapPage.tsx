@@ -334,7 +334,6 @@ const MapPage = () => {
             mapRef.current?.deselectMarker?.();
           }}
           mapRef={mapRef}
-          userLocation={userLocation}
         />
       )}
 
