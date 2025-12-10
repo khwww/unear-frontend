@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react';
-import type { KakaoMap, KakaoCircle } from '@/types/kakao';
+import type { KakaoCircle } from '@/types/kakao';
+import { useMapContext } from '@/contexts/MapContext';
 
 interface EventAreaCircleProps {
   center: { lat: number; lng: number };
   radius: number;
-  map: KakaoMap;
 }
 
-const EventAreaCircle = ({ center, radius, map }: EventAreaCircleProps) => {
+const EventAreaCircle = ({ center, radius }: EventAreaCircleProps) => {
+  const { map } = useMapContext();
   const circleRef = useRef<KakaoCircle | null>(null);
 
   useEffect(() => {

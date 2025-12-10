@@ -1,31 +1,15 @@
 import { useEffect, useRef, useImperativeHandle, forwardRef, useState, useCallback } from 'react';
-import type {
-  KakaoMap,
-  KakaoCustomOverlay,
-  KakaoMarkerClusterer,
-  KakaoMarker,
-  KakaoRoadview,
-  KakaoRoadviewClient,
-} from '@/types/kakao';
+import type { KakaoMap, KakaoMarkerClusterer } from '@/types/kakao';
+import { MapProvider } from '@/contexts/MapContext';
 import EventAreaCircle from './EventAreaCircle';
-import { getPlaces } from '@/apis/getPlaces';
 import { CLUSTERER_STYLES, CLUSTERER_CONFIG } from './constants';
 import {
-  createPlaceMarker,
-  addMarkersToMap,
-  clearMarkers,
-  showRoadviewOverlay,
-  clearRoadviewOverlay,
-  openRoadview,
-  createRoadviewElements,
   initializeClusterer,
   waitForMapReady,
-  createCurrentLocationOverlay,
-  getCurrentPosition,
   setupMapEventListeners,
-  getStoredFilterState,
   isFilterStorageEvent,
 } from '@/utils/map';
+import { useCurrentLocation, useRoadview, useMarkers } from '@/hooks/map';
 
 export interface MapContainerRef {
   showCurrentLocation: () => void;
@@ -68,114 +52,65 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
     const mapRef = useRef<HTMLDivElement>(null);
     const kakaoMapKey = import.meta.env.VITE_KAKAO_MAP_KEY;
     const mapInstanceRef = useRef<KakaoMap | null>(null);
-    const overlayRef = useRef<KakaoCustomOverlay | null>(null);
-    const currentLocationRef = useRef<{ lat: number; lng: number } | null>(null);
-    const [isLocationShown, setIsLocationShown] = useState(false);
     const [mapInstance, setMapInstance] = useState<KakaoMap | null>(null);
-    const selectedPlaceIdRef = useRef<number | null>(null);
     const isSettingCenterRef = useRef(false);
     const clustererRef = useRef<KakaoMarkerClusterer | null>(null);
-    const markerInstancesRef = useRef<KakaoMarker[]>([]);
-    const [isLoadviewActive, setIsLoadviewActive] = useState(false);
-    const isLoadviewActiveRef = useRef(false);
-    const loadviewOverlaysRef = useRef<KakaoCustomOverlay[]>([]);
-    const roadviewRef = useRef<KakaoRoadview | null>(null);
-    const roadviewClientRef = useRef<KakaoRoadviewClient | null>(null);
-    const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
     // 디바운싱을 위한 ref
     const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // isLoadviewActive 상태가 변경될 때마다 로드뷰 도로 표시 상태 업데이트
-    useEffect(() => {
-      if (isLoadviewActive) {
-        showLoadviewRoads();
-      } else {
-        clearLoadviewRoads();
-      }
-    }, [isLoadviewActive]);
+    // 커스텀 훅 사용
+    const { currentLocation, isLocationShown, showCurrentLocation, renderCurrentLocation } =
+      useCurrentLocation();
 
-    const clearSelectedMarker = () => {
-      selectedPlaceIdRef.current = null;
-      onMarkerDeselect?.();
-    };
-
-    const toggleLoadview = (isActive: boolean) => {
-      setIsLoadviewActive(isActive);
-      isLoadviewActiveRef.current = isActive;
-      onLoadviewStateChange?.(isActive);
-    };
-
-    // 로드뷰 관련 refs 객체
-    const roadviewRefs = {
-      roadviewRef,
-      roadviewClientRef,
-      closeButtonRef,
-      loadviewOverlaysRef,
-    };
-
-    const showLoadviewRoads = () => {
-      const map = mapInstanceRef.current;
-      if (!map) return;
-
-      clearLoadviewRoads();
-      showRoadviewOverlay(map);
-    };
-
-    const openLoadviewHandler = (lat: number, lng: number) => {
-      openRoadview({
-        lat,
-        lng,
-        refs: roadviewRefs,
-        onRoadviewStateChange,
-        initializeRoadview,
-      });
-    };
-
-    const clearLoadviewRoads = () => {
-      clearRoadviewOverlay(mapInstanceRef.current, loadviewOverlaysRef);
-    };
-
-    const initializeRoadview = () => {
-      const mapContainer = mapRef.current;
-      if (!mapContainer) return;
-
-      createRoadviewElements({
-        mapContainer,
-        refs: roadviewRefs,
+    const { toggleLoadview, openLoadviewHandler, initializeRoadview, isLoadviewActiveRef } =
+      useRoadview({
+        mapContainerRef: mapRef,
+        mapInstanceRef,
+        onLoadviewStateChange,
         onRoadviewStateChange,
       });
-    };
 
-    const renderCurrentLocation = useCallback((lat: number, lng: number) => {
-      const map = mapInstanceRef.current;
-      if (!map) return;
+    const {
+      selectedPlaceIdRef,
+      markerInstancesRef,
+      renderMarkers: renderMarkersBase,
+      clearSelectedMarker: clearSelectedMarkerBase,
+    } = useMarkers({
+      onMarkerClick,
+      isLocationShown,
+      renderCurrentLocation,
+      currentLocation,
+    });
 
-      if (overlayRef.current) {
-        overlayRef.current.setMap(null);
+    // 마커 렌더링 래퍼 (map, clusterer 주입)
+    const renderMarkers = useCallback(() => {
+      renderMarkersBase(mapInstanceRef.current, clustererRef.current);
+    }, [renderMarkersBase]);
+
+    // 마커 선택 해제 래퍼
+    const clearSelectedMarker = useCallback(() => {
+      clearSelectedMarkerBase(onMarkerDeselect);
+    }, [clearSelectedMarkerBase, onMarkerDeselect]);
+
+    // 디바운싱된 renderMarkers 함수
+    const debouncedRenderMarkers = useCallback(() => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
       }
 
-      const overlay = createCurrentLocationOverlay(lat, lng, map);
-      overlayRef.current = overlay;
-    }, []);
+      debounceTimeoutRef.current = setTimeout(() => {
+        renderMarkers();
+      }, 500);
+    }, [renderMarkers]);
 
-    const showCurrentLocation = () => {
-      getCurrentPosition()
-        .then(({ lat, lng }) => {
-          currentLocationRef.current = { lat, lng };
-          renderCurrentLocation(lat, lng);
-          mapInstanceRef.current?.setCenter(new window.kakao.maps.LatLng(lat, lng));
-          setIsLocationShown(true);
-        })
-        .catch((error) => {
-          if (error.message === '이 브라우저는 위치 정보 사용을 지원하지 않습니다.') {
-            alert(error.message);
-          }
-        });
-    };
+    // 현재 위치 표시 래퍼
+    const handleShowCurrentLocation = useCallback(() => {
+      showCurrentLocation(mapInstanceRef.current);
+    }, [showCurrentLocation]);
 
     useImperativeHandle(ref, () => ({
-      showCurrentLocation,
+      showCurrentLocation: handleShowCurrentLocation,
       deselectMarker: () => {
         clearSelectedMarker();
       },
@@ -207,7 +142,6 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
       fetchPlaces: () => {
         if (mapInstanceRef.current) {
           renderMarkers();
-        } else {
         }
       },
       getBounds: () => {
@@ -228,92 +162,6 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
       toggleLoadview,
     }));
 
-    // 디바운싱된 renderMarkers 함수
-    const debouncedRenderMarkers = useCallback(() => {
-      // 기존 타이머가 있다면 취소
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-
-      // 500ms 후에 실행
-      debounceTimeoutRef.current = setTimeout(() => {
-        renderMarkers();
-      }, 500);
-    }, []);
-
-    const renderMarkers = useCallback(async () => {
-      const map = mapInstanceRef.current;
-      const clusterer = clustererRef.current;
-      if (!map) return;
-
-      const bounds = map.getBounds();
-      const sw = bounds.getSouthWest();
-      const ne = bounds.getNorthEast();
-      const currentLevel = map.getLevel();
-
-      const filterState = getStoredFilterState();
-
-      try {
-        const places = await getPlaces({
-          swLat: sw.getLat(),
-          swLng: sw.getLng(),
-          neLat: ne.getLat(),
-          neLng: ne.getLng(),
-          isFavorite: filterState.isBookmarkOnly,
-          categoryCodes: filterState.categoryCodes,
-          benefitCategories: filterState.benefitCategories,
-        });
-
-        // 기존 마커들을 완전히 제거
-        if (markerInstancesRef.current.length > 0) {
-          clearMarkers(markerInstancesRef.current, clusterer);
-          markerInstancesRef.current = [];
-        }
-
-        if (places.length === 0) {
-          if (!isLocationShown && currentLocationRef.current) {
-            renderCurrentLocation(currentLocationRef.current.lat, currentLocationRef.current.lng);
-          }
-          // 지도를 다시 그리기
-          const center = map.getCenter();
-          map.setCenter(center);
-          return;
-        }
-
-        const newMarkers: KakaoMarker[] = places.map((place) =>
-          createPlaceMarker({
-            place,
-            isSelected: selectedPlaceIdRef.current === place.placeId,
-            showLabel: currentLevel <= 4,
-            onMarkerClick,
-            onSelect: (placeId) => {
-              selectedPlaceIdRef.current = placeId;
-            },
-          })
-        );
-
-        markerInstancesRef.current = newMarkers;
-        const currentZoom = mapInstanceRef.current?.getLevel?.() ?? 4;
-
-        // 마커를 지도에 추가
-        addMarkersToMap({
-          markers: newMarkers,
-          map,
-          clusterer,
-          placesCount: places.length,
-          currentZoom,
-        });
-
-        if (!isLocationShown && currentLocationRef.current) {
-          renderCurrentLocation(currentLocationRef.current.lat, currentLocationRef.current.lng);
-        }
-
-        // 마커 업데이트 후 지도 다시 그리기
-        const center = map.getCenter();
-        map.setCenter(center);
-      } catch (error) {}
-    }, [isLocationShown, onMarkerClick]);
-
     // 필터링 상태가 변경될 때마다 마커를 다시 렌더링
     useEffect(() => {
       if (mapInstanceRef.current) {
@@ -321,15 +169,12 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
       }
     }, [isBookmarkOnly, categoryCodes, benefitCategories, renderMarkers]);
 
-    // selectedPlaceId가 변경될 때는 renderMarkers를 호출하지 않음
-    // 마커 선택 상태는 renderMarkers 내에서 처리됨
-
+    // 카카오맵 초기화
     useEffect(() => {
       if (!kakaoMapKey) {
         return;
       }
 
-      // 기존 스크립트가 있다면 제거
       const existingScript = document.querySelector('script[src*="dapi.kakao.com"]');
       if (existingScript) {
         existingScript.remove();
@@ -342,7 +187,6 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
       document.head.appendChild(script);
 
       script.onload = () => {
-        // 카카오맵 API가 완전히 로드되었는지 확인
         if (window.kakao && window.kakao.maps && typeof window.kakao.maps.load === 'function') {
           window.kakao.maps.load(() => {
             const container = mapRef.current;
@@ -355,7 +199,6 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
 
             mapInstanceRef.current = map;
 
-            // 클러스터러 초기화 핸들러
             const handleClustererInit = () => {
               initializeClusterer({
                 map,
@@ -370,7 +213,6 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
               });
             };
 
-            // 지도 로드 완료 대기 후 클러스터러 초기화
             waitForMapReady({
               map,
               onReady: handleClustererInit,
@@ -382,7 +224,8 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
 
             setMapInstance(map);
 
-            showCurrentLocation();
+            // 현재 위치 표시
+            showCurrentLocation(map);
 
             // 로드뷰 초기화
             initializeRoadview();
@@ -418,18 +261,16 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
         if (clustererRef.current && markerInstancesRef.current.length > 0) {
           clustererRef.current.removeMarkers(markerInstancesRef.current);
         }
-        if (overlayRef.current) {
-          overlayRef.current.setMap(null);
-        }
       };
     }, [kakaoMapKey]);
 
+    // 위치 복원
     useEffect(() => {
-      if (shouldRestoreLocation && mapInstanceRef.current && currentLocationRef.current) {
-        const { lat, lng } = currentLocationRef.current;
+      if (shouldRestoreLocation && mapInstanceRef.current && currentLocation) {
+        const { lat, lng } = currentLocation;
         mapInstanceRef.current.setCenter(new window.kakao.maps.LatLng(lat, lng));
       }
-    }, [shouldRestoreLocation]);
+    }, [shouldRestoreLocation, currentLocation]);
 
     // 로컬스토리지 변경 감지
     useEffect(() => {
@@ -455,15 +296,13 @@ const MapContainer = forwardRef<MapContainerRef, MapContainerProps>(
     }, []);
 
     return (
-      <div ref={mapRef} className="w-full h-full absolute top-0 left-0 z-0">
-        {mapInstance && (
-          <EventAreaCircle
-            center={{ lat: 37.544581, lng: 127.055961 }}
-            radius={800}
-            map={mapInstance}
-          />
-        )}
-      </div>
+      <MapProvider value={{ map: mapInstance, clusterer: clustererRef.current }}>
+        <div ref={mapRef} className="w-full h-full absolute top-0 left-0 z-0">
+          {mapInstance && (
+            <EventAreaCircle center={{ lat: 37.544581, lng: 127.055961 }} radius={800} />
+          )}
+        </div>
+      </MapProvider>
     );
   }
 );
