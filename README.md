@@ -42,8 +42,7 @@
 | -------------------- | --------------------------------------------------------------------------- |
 | 🖥️ **Frontend**      | [프론트엔드 저장소](https://github.com/ureca-poject-unear/unear-frontend)        |
 | 🔧 **Backend**       | [백엔드 저장소](https://github.com/ureca-poject-unear/unear-user-backend)             |
-| 📝 **Documentation** | [프로젝트 노션](https://veiled-foe-fd5.notion.site/7-U-Near-22077da8c8038036aec4fe7527ca5a54?source=copy_link)                            |
-| 🎨 **Design**        | [Figma 디자인](https://www.figma.com/design/J8kcia6vzarmRddDKSBaEg/-%EC%9C%A0%EB%A0%88%EC%B9%B4-%EC%9C%B5%ED%95%A9%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8--7%ED%8C%80?node-id=400-217&t=GNpcf3g5JsLcFtcy-1)                              |
+| 🎨 **Design**        | [Figma 디자인](https://www.figma.com/design/J8kcia6vzarmRddDKSBaEg/-%EC%9C%A0%EB%A0%88%EC%B9%B4-%EC%9C%B5%ED%95%A9%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8--7%ED%8C%80?node-id=400-217&t=GNpcf3g5JsLcFtcy-1)                              
 | 📷 **Video Link**        | [시연영상 링크](https://www.youtube.com/watch?v=6NjBhV3zJFI)              |
 
 </div>
